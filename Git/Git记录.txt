@@ -38,7 +38,7 @@ $ git status
   （使用 "git add <文件>..." 更新要提交的内容）
   （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
 
-	修改：     readme.txt
+  修改：     readme.txt
 
 修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
 
@@ -57,7 +57,7 @@ $ git status
 位于分支 master
 要提交的变更：
   （使用 "git reset HEAD <文件>..." 以取消暂存）
-	修改：     readme.txt
+  修改：     readme.txt
 
 执行git commit，然后执行git status。说明没有需要提交到修改，并且工作区是干净的（work tree clean）
 $git status
@@ -138,12 +138,12 @@ $ git status
   （使用 "git add <文件>..." 更新要提交的内容）
   （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
 
-	修改：     readme.txt
+  修改：     readme.txt
 
 未跟踪的文件:
   （使用 "git add <文件>..." 以包含要提交的内容）
 
-	LICENSE
+  LICENSE
 
 修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
 
@@ -195,7 +195,7 @@ $ git status
   （使用 "git add/rm <文件>..." 更新要提交的内容）
   （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
 
-	删除：     LICENSE
+  删除：     LICENSE
 
 修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
 
@@ -247,7 +247,7 @@ https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b
 
 在版本回退里知道，Git会把每次提交串成一条时间线，这条时间线就是一个分支。目前的示例，只有一条时间线，在Git里，这个分支叫主分支，即master分支。HEAD严格意义上来说并不是指向提交，而是指向master，master才是指向提交到，所以HEAD指向当前分支。
 
-一开始，master分支是一条线，Git用master指向最新的提交，在用HEAD指向master，就能确定当前分支，以及当前分支的提交点。	每次提交，master分支都会向前移动一步，这样，随着你不断提交，master分支的线也越来越长。
+一开始，master分支是一条线，Git用master指向最新的提交，在用HEAD指向master，就能确定当前分支，以及当前分支的提交点。  每次提交，master分支都会向前移动一步，这样，随着你不断提交，master分支的线也越来越长。
 
 当我们创建新分支，如dev时，Git新建一个指针叫dev，指向master相同的提交，再把HEAD指向dev，表示当前分支在dev上。从现在开始，对工作区的修改和提交就是针对dev分支了。比如，新提交一次后，dev指针往前移动一步，而master指针不变。
 
@@ -330,5 +330,78 @@ $ git merge --no-ff -m "merge with no-ff" dev
 那在哪干活呢？干活都在dev分支上，也就是说，dev分支是不稳定的，到某个时候，比如1.0版本发布时，再把dev分支合并到master上，在master分支发布1.0版本；
 你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，时不时地往dev分支上合并就可以了。
 
-4.4Bug分支
+4.4Bug/Feature分支
+添加一个新功能或修改bug，肯定不希望因为一些实验性质的代码把主分支搞乱了，所以最好新建一个分支，在上面开发，完成后合并，最后删除该分支。
+
+
+4.5多人协作
+当从远程仓库clone时，实际上git自动把本地的master分支和远程的master分支对应起来了。并且，远程仓库的默认名称是origin。
+
+查看远程仓库的信息，可以使用git remote。或者用git remote -v显示更详细的信息，将显示可以抓取和推送的origin地址。如果没有推送权限，就看不到push地址
+$ git remote
+origin
+
+$ git remote -v
+origin  git@github.com:754334879/gittest.git (fetch)
+origin  git@github.com:754334879/gittest.git (push)
+
+
+推送分支
+就是把该分支上所有的本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+
+$ git push origin master
+也可以推送其他分支
+$ git push origin dev
+
+但是，并不是一定要把本地分支往远程推送，那么，哪些分支需要推送，哪些不需要呢？
+master分支是主分支，因此要时刻与远程同步；
+dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+
+
+抓取分支
+多人协作时，大家都会往master和dev分支上推送各自的修改。
+当你的小伙伴从远程库clone时，默认情况下，你的小伙伴只能看到本地的master分支。要在dev分支上开发，就必须创建远程origin的dev分支到本地。可以使用下面的命令。
+$ git branch dev origin/dev
+Branch 'dev' set up to track remote branch 'dev' from 'origin'.
+
+现在可以在dev上继续修改，然后，随时把dev分支push到远程。
+
+
+当推送失败时，有可能是存在冲突。解决办法很简单，先用git pull把最新的提交从origin/dev抓下来，然后在本地合并，解决冲突，再推送：
+$ git pull
+
+
+如果pull失败了，原因是没有指定本地dev分支与远程origin/dev分支的链接，可以使用下面命令设置dev和origin/dev的链接（使用上面“抓取分支”的命令也可以）：
+$ git branch --set-upstream-to=origin/dev dev
+Branch 'dev' set up to track remote branch 'dev' from 'origin'.
+
+所以，多人协作的工作模式通常是：
+首先，可以视图用git push origin <branch-name>推送自己的修改
+如果推送失败，则因为远程分支比本地的更新，需要先用git pull进行合并；
+如果合并有冲突，则解决冲突，并在本地提交；
+如果没冲突，或解决了冲突，再用git push origin <branch-name>推送就能成功
+
+如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream-to=origin/dev dev
+
+总结：
+查看远程库信息：git remote -v
+本地新建分支如果不推送到远程，对其他人就是不可见的
+从本地推送分支，使用git push origin <branch-name>；如果推送失败，先用git pull抓取远程的新提交
+在本地创建和远程分支对应的分支，使用git checkout -b branch-name orign/branch-name,本地和远程分支名称最好一致；
+建立本地分支和远程分支的管理，使用git branch --set-upstream <branch-name> origin/<branch-name>
+从远程抓取分支，使用git pull，如果有冲突，先处理冲突。
+
+
+
+
+
+
+
+
+
+
+
+
 
