@@ -1,0 +1,334 @@
+
+git学习
+
+https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000
+https://www.yiibai.com/git
+https://mp.weixin.qq.com/s/IDChhMK_BR1dUJemOnwv9Q
+
+
+
+1.基本操作
+使用git init可以将当前目录变为Git可以管理的仓库。
+$ git init
+已初始化空的 Git 仓库于 /Users/qitmac000535/work/test/gittest/.git/
+
+第一步：创建文件readme.text，并把文件添加到仓库。执行下面的命令，没有任何显示。
+$ git add readme.txt
+
+第二步：把文件提交到仓库。-m后面的内容是本次提交到说明，可以输入任意内容，就是提交说明。该命令成功后会显示，1file changed: 1个文件改动；1 insertions: 插入了一行；1 deletion：删掉了一行
+$ git commit -m "first commit"
+[master 76e3812] first commit
+1 file changed, 1 insertion(+), 1 deletion(-)
+
+为什么使用Git添加文件，需要add 和 commit两步呢？因为commit可以一次提交多个文件，所以你可以多次add不同的文件。
+
+总结：
+初始化版本库：git inti
+添加文件到版本库：git add , git commit
+查看仓库状态：git status
+
+2.工作流
+
+~工作区状态
+
+继续修改readme.txt。然后执行git status命令。该命令可以让我们掌握仓库当前的状态。下面输出的内容说明，readme.txt文件被修改了，但还没准备提交。
+$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     readme.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+
+执行git diff命令。该命令就是查看difference，可以看到对readme.txt文件做的修改。
+$ git diff
+diff --git a/readme.txt b/readme.txt
+index 032d4d7..758c27a 100644
+--- a/readme.txt
++++ b/readme.txt
+@@ -1 +1,2 @@
+ git is a version control system. 1 2
++git is a free software
+
+执行git add命令，然后执行git status命令。可以查看待提交的内容
+$ git status
+位于分支 master
+要提交的变更：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+	修改：     readme.txt
+
+执行git commit，然后执行git status。说明没有需要提交到修改，并且工作区是干净的（work tree clean）
+$git status
+位于分支 master
+无文件要提交，干净的工作区
+
+总结：
+查看工作区状态： git status
+查看修改的内容：git diff
+
+2.2版本回退
+执行git log命令可以查看提交日志。可以加上参数--pretty=oneline参数，使每次提交记录显示为一行。
+
+下面的一大串类似5227...的是commit id(版本号)，和SVN不一样，Git的commit id不是递增的数字，而是一个SHA1计算出来的非常大的数字，用十六进制表示。这是因为Git使分布式的版本控制系统，后面我们还要研究多人在同一个版本库里工作，如果大家都用1，2，3……作为版本号，那肯定就冲突了。
+
+在Git中，用HEAD表示当前版本，如下。上一个版本就是HEAD^，上上一个版本就是HEAD^^。往上版本较多的时候可以使用 HEAD~100，表示往上100个版本
+
+$ git log
+commit 5227359eb1441254279d4f624041e0971a0bd3c5 (HEAD -> master)
+Author: qitmac000535 <qitmac000535@qitmac000535deMacBook-Pro.local>
+Date:   Sun Nov 4 15:16:12 2018 +0800
+
+    151316
+
+commit 386406fc26795c54b2ecd3e956afaf0fe32d8c5e
+Author: qitmac000535 <qitmac000535@qitmac000535deMacBook-Pro.local>
+Date:   Sun Nov 4 15:13:31 2018 +0800
+
+    151301
+
+commit f6b3443814aee8d5ba2042cb8e9fd23403c57878
+Author: qitmac000535 <qitmac000535@qitmac000535deMacBook-Pro.local>
+Date:   Fri Nov 2 21:31:27 2018 +0800
+
+    new commit
+
+
+执行命令git reset 可以进行版本回退。可以使用HEAD^、HEAD~N执行往上回退的提交次数，或者使用commit id（版本号没必要写全，前几位就可以，Git会自动查找）。Git版本回退速度非常快，因为Git在内部有个指向当前版本的HEAD指针，当你回退版本的时候，Git仅仅是把HEAD的执行做了调整，并更新工作区的文件。
+$ git reset --hard HEAD^
+HEAD 现在位于 386406f 151301
+
+$ git reset --hard f6b3
+HEAD 现在位于 f6b3443 new commit
+
+Git提供了命令git reflog， 用来记录你的每一次命令。通过这个可以看每次提交或更改提交到记录，从而决定要回到哪个版本。
+$ git reflog
+f6b3443 (HEAD -> master) HEAD@{0}: reset: moving to f6b3
+386406f HEAD@{1}: reset: moving to HEAD^
+5227359 HEAD@{2}: commit: 151316
+386406f HEAD@{3}: commit: 151301
+f6b3443 (HEAD -> master) HEAD@{4}: commit: new commit
+76e3812 HEAD@{5}: commit: first commit
+6e42757 HEAD@{6}: commit (initial): first commit
+
+总结：
+查看提交日志：git log [--pretty=oneline]
+进行版本切换：git reset --hard commit_id
+查看执行的历史命令：git reflog
+
+2.3工作区和暂存区
+Git和SVN的一个区别就是有暂存区的概念。
+
+工作区：就是在电脑里能看到的目录
+版本库：工作区有一个隐藏的目录.git，这个是Git的版本库
+
+Git版本库里有很多东西，其中最重要的就是称为stage（或者叫index）的暂存区。还有Git为我们创建的第一个分支master，以及指向master的一个指针HEAD.
+
+前面说向Git提交需要执行两步：
+第一步，用git add把文件添加进去，实际上就是把文件修改添加到暂存区
+第二步，用git commit提交更改，实际上就是把暂存区的所有内容提交到当前分支。因为创建Git版本库的时候，Git自动创建了master分支，所以执行commit就是往master分支上提交更改
+
+可以简单理解为，需要提交的文件修改通通放到暂存区，然后，一次性提交暂存区的所有修改。
+
+例如，修改readme.txt，并添加LICENSE文件。Git非常清楚地告诉我们，readme.txt被修改了，而LICENSE还从来没有被添加过，所以它的状态是未跟踪Untracked。
+$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     readme.txt
+
+未跟踪的文件:
+  （使用 "git add <文件>..." 以包含要提交的内容）
+
+	LICENSE
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+
+执行git add，将readme.txt和LICENSE添加到暂存区。执行git commit命令， 一次性把暂存区的修改提交到当前分支。
+$ git commit -m "how stage works"
+[master c44fe5f] how stage works
+ 2 files changed, 2 insertions(+)
+ create mode 100644 LICENSE
+
+一旦提交后，如果你又没有对工作区做任何修改，那么工作区就是“干净”的。
+
+总结：
+工作区和暂存区的内容可以见图片。
+
+2.4管理修改
+为什么Git比其他版本控制系统设计得更优秀，因为Git跟踪并管理修改，而不是文件。
+每次修改，如果不用git add添加到暂存区，那就不会加到commit中。
+
+2.5撤销修改
+执行git checkout -- file，可以丢弃工作区的修改。命令里的--很重要，如果没有，就变成了『切换到另一个分支』的命令。下面命令就是把readme.txt文件在工作区做的修改全部撤销。这里有两种情况：
+一种是readme.txt自修改后还没有被放到暂存区。现在撤销修改后回到和版本库一样的状态；
+另一种是readme.txt已经添加到了暂存区，又做了修改。现在撤销修改后 回到添加到暂存区后的状态。
+总之，就是让这个文件回到最近一个git add或git commit时的状态。
+
+git checkout其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
+
+$ git checkout -- readme.txt
+
+
+如果文件修改已经添加到了暂存区，此时需要把暂存区的修改撤销掉。可以使用git reset HEAD <file>命令。git reset命令既可以回退版本，也可以把暂存区的修改回退到工作区。 当我们用HEAD时，表示最新的版本。
+
+执行完git reset命令后，只会有工作区的修改。要撤销掉工作区的变更，就看上面的方式 git checkout -- <file>。
+
+$git reset HEAD readme.txt
+
+
+总结：
+场景1：当该乱了工作区的某个文件，想直接丢弃工作区的修改时，用命令git checkout -- <file>
+场景2：当不但改乱了工作区的某个文件，还添加到了暂存区，想丢弃修改。分两步，第一步用git reset HEAD <file>回到场景1，然后再调整工作区
+场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考版本回退一节，不过前提是没有推送到远程库。
+
+Q: 为什么使用git reset --hard commit_id，会进行版本回退，更改工作区的文件内容以及清空暂存区 （这个可以验证的），而使用git reset HEAD <file>，只会清空暂存区，即撤销暂存区的修改，但不影响工作区呢？
+
+2.6删除文件
+如果在工作区删掉文件，使用git status命令会告诉你哪些文件删除了。并且有两种情况：
+$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add/rm <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	删除：     LICENSE
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+
+
+一种情况是，删错了。由于版本库中还有这个文件，可以比较轻松点把误删的文件恢复到最新版本。
+$ git checkout -- LICENSE
+
+另一种情况是，需要从版本库中删除该文件，用命令git rm删除，并且commit.
+$ git rm LICENSE
+rm 'LICENSE'
+
+$ git commit -m "rm a file"
+[master e53b4b2] rm a file
+ 1 file changed, 1 deletion(-)
+ delete mode 100644 LICENSE
+
+
+总结：
+删除一个文件。可以使用git rm删除，此时会在工作区删掉这个文件，并且暂存区也有删除。然后使用git commit提交。
+
+
+3.远程仓库
+使用github作为远程仓库。
+3.1添加远程仓库
+要关联一个远程库，使用命令git remote add origin git@server-name:path/repo-name.git；
+
+关联后，使用命令git push -u origin master第一次推送master分支的所有内容；
+
+此后，每次本地提交后，只要有必要，就可以使用命令git push origin master推送最新修改；（那么如何提交其他分支的内容呢？）
+
+分布式版本系统的最大好处之一是在本地工作完全不需要考虑远程库的存在，也就是有没有联网都可以正常工作，而SVN在没有联网的时候是拒绝干活的！当有网络的时候，再把本地提交推送一下就完成了同步，真是太方便了！
+
+3.2克隆远程仓库
+要克隆一个仓库，首先必须知道仓库的地址，然后使用git clone命令克隆。
+
+Git支持多种协议，包括https，但通过ssh支持的原生git协议速度最快。
+
+
+
+4.分支管理
+分支的作用：
+假设你准备开发一个新功能，但是需要两天完成。第一天完成了50%但代码，如果立即提交，不完整的代码库会导致别人不能干活。如果等代码全部完成后再提交，有存在本地丢失代码的风险。
+有了分支就不怕了。你可以创建一个属于自己的分支，别人看不到，还继续在原来的分支上正常工作。而你在自己的分支上干活，可以随时提交，直到开发完毕再进行分支合并。这样即安全又不影响别人的工作。
+
+Git的分支是与众不同的，无论创建、切换和删除分支，Git在1秒钟之内就能完成！无论你的版本库是1个文件还是1万个文件。
+
+4.1创建与合并分支
+https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/001375840038939c291467cc7c747b1810aab2fb8863508000
+
+在版本回退里知道，Git会把每次提交串成一条时间线，这条时间线就是一个分支。目前的示例，只有一条时间线，在Git里，这个分支叫主分支，即master分支。HEAD严格意义上来说并不是指向提交，而是指向master，master才是指向提交到，所以HEAD指向当前分支。
+
+一开始，master分支是一条线，Git用master指向最新的提交，在用HEAD指向master，就能确定当前分支，以及当前分支的提交点。	每次提交，master分支都会向前移动一步，这样，随着你不断提交，master分支的线也越来越长。
+
+当我们创建新分支，如dev时，Git新建一个指针叫dev，指向master相同的提交，再把HEAD指向dev，表示当前分支在dev上。从现在开始，对工作区的修改和提交就是针对dev分支了。比如，新提交一次后，dev指针往前移动一步，而master指针不变。
+
+假如在dev上的工作完成了，就可以把dev合并到master上。Git是怎么合并的呢？就是直接把master执行dev当前的提交，就完成了合并。
+
+完成合并后，甚至可以删除dev分支。删除dev分支就是把dev指针给删掉。删掉后，就剩下一条master分支了。
+
+因为创建、合并和删除分支非常快，所以Git鼓励使用分支完成某个任务，合并后再删掉分支，这和直接在master分支上工作效果是一样的，但过程更安全。
+
+
+执行命令git branch <name>创建分支，没有name时会列出所有分支，当前分支会标一个*号。
+$ git branch dev
+$ git branch
+  dev
+* master
+
+执行命令git checkout <branch>切换分支。后面做的修改都是在dev分支上进行的。
+$ git checkout dev
+切换到分支 'dev'
+
+$ git commit -m "brance test"
+[dev 445ea16] brance test
+ 1 file changed, 1 insertion(+)
+ create mode 100644 LICENSE
+
+执行命令git checkout master切换到master分支，此时工作区没有LICENSE文件。这是因为LICENSE在dev分支上，而master分支上的提交点还没有改变。
+$ git checkout master
+切换到分支 'master'
+您的分支与上游分支 'origin/master' 一致。
+
+执行命令git merge <branch>。将dev分支的内容合并到master分支上。
+$ git merge dev
+更新 338d23e..445ea16
+Fast-forward
+ LICENSE | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 LICENSE
+
+删除dev分支。然后查看branch，就是有master分支了
+$ git branch -d dev
+已删除分支 dev（曾为 445ea16）。
+$ qitmac000535$ git branch
+* master
+
+总结：
+查看分支：git branch
+创建分支：git branch <name>
+切换分支：git checkout <name>
+创建+切换分支：git checkout -b <name>
+合并某分支到当前分支：git merge <name>
+删除分支：git branch -d <name>
+
+4.2解决冲突
+准备新分支dev，并修改readme.txt，然后add和commit；
+切换到master分支，也修改readme.txt，然后add和commit；
+此时，合并dev分支。由于master和dev各自有新的提交，此时Git无法执行“快速合并”，只能试图把各自的修改合并起来，但这种合并就可能会有冲突
+$ git merge dev
+自动合并 readme.txt
+冲突（内容）：合并冲突于 readme.txt
+自动合并失败，修正冲突然后提交修正的结果。
+
+Git用<<<<<<<，=======，>>>>>>>标记出不同分支的内容，修改后保存。再提交。
+
+总结：
+当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。
+解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。
+用git log --graph命令可以看到分支合并图。
+
+这里有个问题。开发中如果多人在一个文件上做修改，应该怎么办，什么时候处理冲突、什么时候更新本地代码
+
+4.3分支管理策略
+合并分支时，如果可能，Git会用Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息。
+如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。
+
+下面的命令准备合并dev分支，--no-ff表示禁用Fast Forward。 这次合并会创建一次commit，所以加上-m参数，添加commit的描述
+$ git merge --no-ff -m "merge with no-ff" dev
+
+在实际开发中，我们应该按照几个基本原则进行分支管理：
+首先，master分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
+那在哪干活呢？干活都在dev分支上，也就是说，dev分支是不稳定的，到某个时候，比如1.0版本发布时，再把dev分支合并到master上，在master分支发布1.0版本；
+你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，时不时地往dev分支上合并就可以了。
+
+4.4Bug分支
+
