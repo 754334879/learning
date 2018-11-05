@@ -1,0 +1,77 @@
+Sass的规则：
+
+https://www.sass.hk/guide/
+
+1.变量
+使用$符号标识变量。
+
+声明变量
+$siderbar-width: 3px。意味着变量siderbar-width的值为3px。+
+声明变量可以在规则块内（此时只在改规则块及其嵌套的块内有效），也可以在规则块外（此时可以在任何地方使用）
+
+变量引用
+.sider{
+	border: $siderbar-wdith solid red;
+}
+凡是CSS属性值可以存在的地方就可以使用变量；而且在定义变量的时候也可以引用其他变量。
+
+
+2.规则嵌套
+效果如下：
+#content {
+  article {
+    h1 { color: #333 }
+    p { margin-bottom: 1.4em }
+  }
+  aside { background-color: #EEE }
+}
+编译后：
+#content article h1 { color: #333 }
+#content article p { margin-bottom: 1.4em }
+#content aside { background-color: #EEE }
+
+编译的过程见链接。
+
+2.1父选择器&
+在嵌套的规则中，可以使用&标识父选择器，实现伪类、伪元素、多个选择符选择一个元素的形式。
+效果。否则就是在父选择器后面加空格，再加嵌套规则的选择器了：
+
+效果：
+article a {
+  color: blue;
+  &:hover { color: red }
+  &.store {font-size: 20px}
+}
+编译后：
+article a { color: blue }
+article a:hover { color: red }
+article a.store { font-size: 20px }
+
+2.2群组选择器的嵌套
+效果如下：
+.container {
+  h1, h2, h3 {margin-bottom: .8em}
+}
+编译后：
+.container h1, .container h2, .container h3 { margin-bottom: .8em }
+
+其实就是，如果一个群组选择器被嵌套在规则块的里面，则外层的父选择器会分别添加到群组选择器的每个选择符前面。
+
+2.3>、+、~选择符
+使用这些选择符的时候直接用就好，嵌套的外层选择器会添加到这些选择符前面的。
+
+2.4属性嵌套
+这个用的不多。把属性名从中划线-的地方断开，在根属性后面添加一个冒号:，然后后面加上大括号{ }，把属性的其他部分写在里面。
+nav {
+  border: {
+  style: solid;
+  width: 1px;
+  color: #ccc;
+  }
+}
+编译后：
+nav {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #ccc;
+}
