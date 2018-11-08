@@ -171,6 +171,45 @@ ul.plain li {
 
 如果一个混合器只包含css规则，不包含属性，那么这个混合器可以在文档的顶部调用，写在所有的css规则块之外。
 
+5.2给混合器传参
+可以在@include混合器时传递参数，来实现不同的样式。类似于js里调用function
+@mixin link-color($normal, $hover, $visited) {
+  color: $normal;
+  &:hover{
+    color: $hover;
+  }
+  &:visited {
+    color: $visited;
+  }
+}
+使用方式：
+a {
+  @include link-color(blue, red, green)
+}
+
+但，在调用时不容易区分每个参数是什么意思，以及参数的顺序。为解决这个问题，sass允许通过语法 $name: value 的形式来指定每个参数的值。此时，顺序就不重要了
+a {
+  @include link-color($hover: red, $normal: blue, $visited: green)
+}
+
+5.3默认参数值
+为了在@include混合器时不必传入所有参数，可以在定义@mixin时指定默认值。使用$name: defalut-value的形式，默认值可以是任何有效的CSS属性，甚至是其他参数的引用（这种指定默认值当形式与ES6为函数命名参数指定默认值类似）
+
+@mixin link-colors($normal, $hover: $normal, $visited: $normal){
+  color: $normal;
+  &:hover{
+    color: $hover;
+  }
+  &:visited {
+    color: $visited;
+  }
+}
+调用：@include link-colors($normal: red)，则$hover和$visited也被自动赋值red。
+
+6.使用选择器继承
+不常用
+
+
 
 
 
