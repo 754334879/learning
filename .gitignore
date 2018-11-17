@@ -1,0 +1,6 @@
+#ignore file like ~filename.doc
+~*
+
+#ignore .gitignore
+.gitignore
+
